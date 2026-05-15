@@ -1,0 +1,156 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "default_agent": "build",
+  "agent": {
+    "build": {
+      "mode": "primary",
+      "description": "Agente de desarrollo por defecto con todas las herramientas"
+    },
+    "plan": {
+      "mode": "primary",
+      "description": "Agente de planificación y análisis (solo lectura)",
+      "permission": {
+        "edit": "deny",
+        "bash": "deny",
+        "write": "deny"
+      }
+    },
+    "swarm-orchestrator": {
+      "mode": "all",
+      "description": "SWARM Orchestrator - Gatekeeper del pipeline multi-agente secuencial M0→M6. Gestiona el DAG, valida contratos, actualiza memoria e invoca subagentes via Task tool.",
+      "model": "anthropic/claude-sonnet-4-20250514",
+      "temperature": 0.1,
+      "prompt": "{file:./.opencode/agents/orchestrator.md}",
+      "color": "#6366f1",
+      "permission": {
+        "read": "allow",
+        "edit": "allow",
+        "bash": "allow",
+        "write": "allow",
+        "task": {
+          "m0-bootstrapper": "allow",
+          "m1-system-analyst": "allow",
+          "m2-business-analyst": "allow",
+          "m3-architect": "allow",
+          "m4-qa-engineer": "allow",
+          "m5-code-generator": "allow",
+          "m6-devops": "allow"
+        }
+      }
+    },
+    "m0-bootstrapper": {
+      "mode": "subagent",
+      "description": "Foundation/Bootstrapper (M0) - Project Manager. Entrevista al usuario y define PROJECT_MANIFEST.md y BOARD.md en app_result/.",
+      "model": "anthropic/claude-haiku-4-20250514",
+      "prompt": "{file:./.opencode/agents/m0-bootstrapper.md}",
+      "color": "#10b981",
+      "permission": {
+        "read": "allow",
+        "write": "allow",
+        "edit": "allow",
+        "bash": "deny",
+        "glob": "allow",
+        "grep": "allow"
+      }
+    },
+    "m1-system-analyst": {
+      "mode": "subagent",
+      "description": "System Analyst / Discovery (M1) - Analista de Sistemas. Produce TDP.md desde el manifest (greenfield) o desde codigo legacy (brownfield).",
+      "model": "anthropic/claude-sonnet-4-20250514",
+      "prompt": "{file:./.opencode/agents/m1-system-analyst.md}",
+      "color": "#f59e0b",
+      "permission": {
+        "read": "allow",
+        "write": "allow",
+        "edit": "allow",
+        "bash": "allow",
+        "glob": "allow",
+        "grep": "allow"
+      }
+    },
+    "m2-business-analyst": {
+      "mode": "subagent",
+      "description": "Business Analyst / BSP (M2) - Transforma el TDP en BSP.md con reglas de negocio, features y criterios de aceptacion.",
+      "model": "anthropic/claude-sonnet-4-20250514",
+      "prompt": "{file:./.opencode/agents/m2-business-analyst.md}",
+      "color": "#8b5cf6",
+      "permission": {
+        "read": "allow",
+        "write": "allow",
+        "edit": "allow",
+        "bash": "deny",
+        "glob": "allow",
+        "grep": "allow"
+      }
+    },
+    "m3-architect": {
+      "mode": "subagent",
+      "description": "Enterprise Architect (M3) - Define stack tecnologico, patrones arquitectonicos y topologia en ARCHITECTURE.md.",
+      "model": "openai/o3-mini",
+      "prompt": "{file:./.opencode/agents/m3-architect.md}",
+      "color": "#ec4899",
+      "permission": {
+        "read": "allow",
+        "write": "allow",
+        "edit": "allow",
+        "bash": "deny",
+        "glob": "allow",
+        "grep": "allow"
+      }
+    },
+    "m4-qa-engineer": {
+      "mode": "subagent",
+      "description": "QA Engineer (M4) - Genera plan de pruebas, test specs y criterios de aceptacion basados en BSP y arquitectura.",
+      "model": "anthropic/claude-haiku-4-20250514",
+      "prompt": "{file:./.opencode/agents/m4-qa-engineer.md}",
+      "color": "#14b8a6",
+      "permission": {
+        "read": "allow",
+        "write": "allow",
+        "edit": "allow",
+        "bash": "deny",
+        "glob": "allow",
+        "grep": "allow"
+      }
+    },
+    "m5-code-generator": {
+      "mode": "subagent",
+      "description": "Code Generator (M5) - Senior Fullstack Developer. Genera codigo fuente compilable en app_result/src/ basado en BSP, arquitectura y QA plan.",
+      "model": "anthropic/claude-sonnet-4-20250514",
+      "prompt": "{file:./.opencode/agents/m5-code-generator.md}",
+      "color": "#3b82f6",
+      "permission": {
+        "read": "allow",
+        "write": "allow",
+        "edit": "allow",
+        "bash": "allow",
+        "glob": "allow",
+        "grep": "allow"
+      }
+    },
+    "m6-devops": {
+      "mode": "subagent",
+      "description": "DevOps & Release Engineer (M6) - Genera Dockerfiles, pipelines CI/CD y artefactos de despliegue en app_result/deploy/.",
+      "model": "anthropic/claude-haiku-4-20250514",
+      "prompt": "{file:./.opencode/agents/m6-devops.md}",
+      "color": "#f97316",
+      "permission": {
+        "read": "allow",
+        "write": "allow",
+        "edit": "allow",
+        "bash": "allow",
+        "glob": "allow",
+        "grep": "allow"
+      }
+    }
+  },
+  "instructions": [
+    "OPENCODE.md",
+    ".opencode/.swarn/specs/ORCHESTRATOR_PROTOCOL.md",
+    ".opencode/.swarn/specs/CONTRACTS.md"
+  ],
+  "permission": {
+    "edit": "ask",
+    "bash": "ask"
+  }
+}
